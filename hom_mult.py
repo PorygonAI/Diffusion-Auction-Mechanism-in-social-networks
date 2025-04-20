@@ -193,7 +193,7 @@ if __name__ == "__main__":
         global_sr_min = min(sr_min)
         global_sr_max = max(sr_max)
 
-        for i in range(mechanism_count):
+        for i in range(all_list):
             axes[0,i].set_ylim(global_sw_min-10, global_sw_max+10)
             axes[1,i].set_ylim(global_sr_min-10, global_sr_max+10)
 
