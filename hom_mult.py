@@ -39,7 +39,7 @@ def get_priority_mult(i: int, graph: dict, priority_type, visited: set, seller: 
     return hom_single.get_priority(i[0], graph, priority_type, new_visited, seller)
 
 
-def MUDAN_m(graph: dict, valuations: dict, item_count: int, seller: int, priority_type = "new_agent"):
+def MUDAN_m(graph: dict, valuations: dict, item_count: int, seller: int, priority_type):
     generalized_graph, generalized_valuations = Generalized_graph_and_valuations(graph, valuations, item_count, seller)
     MUDAN_allocation, MUDAN_payments, SW, seller_revenue = hom_single.MUDAN(generalized_graph, generalized_valuations, item_count, seller, graph, get_priority_mult, priority_type)
     allocation = {}
@@ -154,6 +154,7 @@ if __name__ == "__main__":
     priority_count = len(priority_types)
     for file in graph_files:
         fig, axes = plt.subplots(2, all_count, figsize=(3 * all_count, 5))
+        fig.suptitle(f'{file}, item = {item_count}', fontsize=16)
 
         sw_min = []
         sw_max = []
@@ -194,16 +195,11 @@ if __name__ == "__main__":
         global_sr_max = max(sr_max)
 
         for i in range(all_count):
-            axes[0,i].set_ylim(global_sw_min-10, global_sw_max+10)
-            axes[1,i].set_ylim(global_sr_min-10, global_sr_max+10)
+            axes[0,i].set_ylim(global_sw_min-10, global_sw_max*1.05)
+            axes[1,i].set_ylim(global_sr_min-10, global_sr_max*1.05)
 
         plt.tight_layout()
         plt.savefig(f'./figure/hom_mult/{file}_plot.png')
         plt.close()
-
-#     graph = {'s':['a','b','c','h'], 'a':['s','d','e'],'b':['s','e','f'], 'c':['s','f'],'d':['a','g'],'e':['a','b'],'f':['b','c'],'g':['d'],'h':['s']}
-#     valuations = {'a':(10,9,8),'b':(6,5,0),'c':(7,6,3),'d':(5,3,2),'e':(4,2,1),'f':(9,7,0),'g':(12,11,0),'h':(2,1,1)}
-    
-#     MUDAN_m(graph, valuations, 3, 's', priority_type = 2)
 
 

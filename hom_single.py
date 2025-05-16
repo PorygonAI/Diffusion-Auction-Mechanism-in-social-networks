@@ -174,7 +174,7 @@ def DNA_MU_R(graph: dict, valuations: dict, item_count: int, seller: int):
     def get_allocation_i(i: int, valuation_i=None):
         new_valuations = copy.deepcopy(valuations)
         if i != None:
-            new_valuations[i] = valuation_i
+            new_valuations[i] = valuation_i + 0.01
 
         k = item_count
         allocation_i = []
@@ -189,23 +189,22 @@ def DNA_MU_R(graph: dict, valuations: dict, item_count: int, seller: int):
         return allocation_i
     
     allocation = get_allocation_i(None)
-
     for i in allocation:
-        # valuation_max = valuations[i]
-        # valuation_min = 0
-        # while(True):
-        #     if (valuation_max == valuation_min) or \
-        #         ((valuation_max - valuation_min == 1) and (i not in get_allocation_i(i, valuation_min))):   
-        #         break
+        valuation_max = valuations[i]
+        valuation_min = 0
+        while(True):
+            if (valuation_max == valuation_min) or \
+                ((valuation_max - valuation_min == 1) and (i not in get_allocation_i(i, valuation_min))):   
+                break
 
-        #     valuation_mid = (valuation_max + valuation_min) // 2
-        #     if i in get_allocation_i(i, valuation_mid):
-        #         valuation_max = valuation_mid
-        #     else:
-        #         valuation_min = valuation_mid
+            valuation_mid = (valuation_max + valuation_min) // 2
+            if i in get_allocation_i(i, valuation_mid):
+                valuation_max = valuation_mid
+            else:
+                valuation_min = valuation_mid
                 
-        # payments[i] = valuation_max
-        payments[i] = np.nan
+        payments[i] = valuation_max
+        # payments[i] = np.nan
        
     SW = sum(valuations[i] for i in allocation)
     seller_revenue = sum(payments.values())
@@ -279,13 +278,6 @@ def MUDAN(graph: dict, valuations: dict, item_count: int, seller: int, graph_for
         payments[w] = 0 if len(buyers_sort_in_E)<m+1 else buyers_sort_in_E[m][1]
         m -= 1
 
-        # print("A", A)
-        # print("P", P)
-        # print("W", W)
-        # print("visited",visited)
-        # print("payments",payments)
-        # print()
-
         if P == W:
             break
     
@@ -305,6 +297,7 @@ if __name__ == "__main__":
     for file in graph_files:
         graph = dataset.get_graph('./dataset/'+file+'.txt')
         valuations = dataset.generate_valuations(graph, item_count, "hom_single")
+        dataset.draw_valuations_distribution(valuations, f'./figure/hom_single/{file}_valuations.png')
         sellers = dataset.generate_sellers(graph, seller_count)
         print(file, sellers)
         mechanisms = [MPA_in_all, MPA_in_neighbors, VCG, VCG_RM, DNA_MU_R, MUDAN]
@@ -336,7 +329,6 @@ if __name__ == "__main__":
             axes[0, i].set_title(f'{mechanisms[i].__name__} - SW')
             axes[0, i].set_xlabel('Seller Index')
             axes[0, i].set_ylabel('SW')
-            axes[0, i].legend()
 
             sw_min.append(min(sw_data))
             sw_max.append(max(sw_data))
@@ -347,7 +339,6 @@ if __name__ == "__main__":
             axes[1, i].set_title(f'{mechanisms[i].__name__} - Seller Revenue')
             axes[1, i].set_xlabel('Seller Index')
             axes[1, i].set_ylabel('Seller Revenue')
-            axes[1, i].legend()
 
             sr_min.append(min(sr_data))
             sr_max.append(max(sr_data))
@@ -365,15 +356,3 @@ if __name__ == "__main__":
         plt.tight_layout()
         plt.savefig(f'./figure/hom_single/{file}_plot.png')
         plt.close()
-
-
-    # item_count = 3
-    # seller = 's'
-    # graph = {'s':['a','b'], 'a':['s','h'], 'b':['s','c'], 'c':['b','d'], 'd':['c','e','i'],'e':['d'],'i':['d'],'h':['a']}
-    # valuations = {'s':10086,'a':3,'b':1,'c':2,'d':100,'e':5,'h':2,'i':4}
-    # print(MPA_in_all(graph, valuations, item_count, seller))
-    # print(MPA_in_neighbors(graph, valuations, item_count, seller))
-    # print(VCG(graph, valuations, item_count, seller))
-    # print(VCG_RM(graph, valuations, item_count, seller))
-    # print(DNA_MU_R(graph, valuations, item_count, seller))
-    # print(MUDAN(graph, valuations, item_count, seller))

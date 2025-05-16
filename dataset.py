@@ -1,5 +1,5 @@
 import random
-import numpy as np
+import matplotlib.pyplot as plt
 
 def get_graph(file: str): 
     graph = {}
@@ -18,21 +18,12 @@ def get_graph(file: str):
     return graph
 
 
-# def get_valuations_from_file(file: str, item_count: int):
-#     valuations = np.load(file,allow_pickle=True).item()
-#     for i in valuations.keys():
-#         valuation = valuations[i] + [0 for _ in range(item_count-len(valuations[i]))]
-#         valuations[i] = valuation
-
-#     return valuations
-
-
 def generate_valuations(graph: dict, item_count: int, auction_type):
     valuations = {}
     match auction_type:
         case "hom_single":
             for i in graph:
-                random_float= random.gauss(50,20)
+                random_float= random.gauss(500,150)
                 valuations[i] = max(0, round(random_float))
         case "hom_mult":
             for i in graph:
@@ -40,11 +31,12 @@ def generate_valuations(graph: dict, item_count: int, auction_type):
                 valuation = [random.randint(0, 1000) for _ in range(demand_count)] + [0 for _ in range(item_count-demand_count)]
                 valuation.sort(reverse=True)
                 valuations[i] = valuation
-        case 3:
+        case "heter_single":
             for i in graph:
-                item_demand = [random.randint(0, 1) for _ in range(item_count)] 
-                valuation = random.randint(0,1000)
-                valuations[i] = (valuation, item_demand)
+                item_demand = [random.randint(0, 1) for _ in range(item_count)]
+                demand_count = item_demand.count(1)
+                random_float = random.gauss(500,150) * demand_count / item_count
+                valuations[i] = (max(0, round(random_float)), item_demand)
         case 4:
             pass
     return valuations
@@ -53,3 +45,16 @@ def generate_valuations(graph: dict, item_count: int, auction_type):
 def generate_sellers(graph: dict, seller_count: int):
     return random.sample(list(graph.keys()), seller_count)
 
+
+def draw_valuations_distribution(valuations: dict, path):
+    max_val = max(valuations.values())
+    bin_width = 10
+    bins = [i * bin_width for i in range(int(max_val / bin_width) + 2)]
+
+    # 绘制直方图
+    plt.hist(valuations.values(), bins=bins)
+    plt.title('Histogram of Valuations')
+    plt.xlabel('Valuation')
+    plt.ylabel('Frequency')
+    plt.savefig(path)
+    plt.close()
